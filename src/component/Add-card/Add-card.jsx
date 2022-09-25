@@ -7,9 +7,9 @@ import TextField from '@mui/material/TextField';
 
 import "../Card-item/card-item.css" 
 
-export const AddCard = ({onBlur, defaultBlurVal, errorInputs, setBlurInputs, cards, setCards, changeIsDone, setAddCardChangeIsDone, addCard, setImg, setImgFormVal, imgFormVal, img, onShowCreateCardForm}) => {
+export const AddCard = ({cards, setCards, changeIsDone, setAddCardChangeIsDone, addCard, setAddCard, setImg, setImgFormVal, imgFormVal, img}) => {
     const defaultCardVal = {
-      id: 100,
+      id: 10000,
       name: "",
       img: "",
       active: false,
@@ -19,8 +19,33 @@ export const AddCard = ({onBlur, defaultBlurVal, errorInputs, setBlurInputs, car
       descr: "",
     };
 
+    const defaultBlurVal = {
+      name: false,
+      img: false,
+      price: false,
+      storeQuantity: false,
+      descr: false,
+    }
+
+
     const [cardVals, setCardVals] = useState({...defaultCardVal});
+    const [blurInputs, setBlurInputs] = useState({...defaultBlurVal});
     const [activeBtn, setActiveBtn] = useState(false);
+
+    const [errorInputs, setErrorInputs] = useState({
+      name: {error: false, text: ""},
+      img: {error: false, text: ""},
+      price: {error: false, text: ""},
+      storeQuantity: {error: false, text: ""},
+      descr: {error: false, text: ""}
+    });
+
+    // const onShowCreateCardForm = () => {
+    //   setAddCardChangeIsDone(prevState => !prevState);
+    //   setAddCard(prevState => !prevState);
+    //   setImg('https://i.pinimg.com/736x/99/c7/f8/99c7f8a1584e2d98434eaa9fdc8a7a84.jpg');
+    //   setImgFormVal("");
+    // }
 
     const onImgAdd = () => {
       setImg(imgFormVal);
@@ -38,23 +63,48 @@ export const AddCard = ({onBlur, defaultBlurVal, errorInputs, setBlurInputs, car
     const onSetNewCardVal = (key) => (e) => {
       setCardVals(cardVals => ({...cardVals,
         [key]: e.target.value,
-        id: cards.length + 1
+        id: cards.length + 100
       }));
     }
 
+    const onBlur = (key) => (e) => {
+      setBlurInputs(inputs => ({...inputs, [key]: true}));
+    }
+
     const onAddCard = () => {
-      setAddCardChangeIsDone(true);
+      setAddCardChangeIsDone(false);
       setCards(cards => [...cards, cardVals]);
       setCardVals({...defaultCardVal});
       setBlurInputs({...defaultBlurVal});
+      setAddCardChangeIsDone(prevState => !prevState);
       onShowCreateCardForm();
     }
+
+    const onShowCreateCardForm = () => {
+      setAddCard(prevState => !prevState);
+      setImg('https://i.pinimg.com/736x/99/c7/f8/99c7f8a1584e2d98434eaa9fdc8a7a84.jpg');
+      setImgFormVal("");
+      setAddCardChangeIsDone(prevState => !prevState);
+      setBlurInputs({...defaultBlurVal});
+  }
 
     useEffect(() => {
       const {name, img: imgURL, price, storeQuantity, descr} = cardVals;
       const active = !!name && !!imgURL && !!price && !!descr && !!storeQuantity;
       setActiveBtn(active);
     }, [cardVals]);
+
+    useEffect(() => {
+      const keys = Object.keys(errorInputs);
+      const onError = (key) => {
+        const err = (blurInputs[key] && !cardVals[key]) ? {error: true, text: "Введите значение"}: {error: false, text: ""};
+        setErrorInputs(inputs => ({...inputs, [key]: err}));
+      }
+
+      keys.forEach(key => {
+        onError(key);
+      });
+    }, [blurInputs, cardVals]);
 
     return (
       <>
